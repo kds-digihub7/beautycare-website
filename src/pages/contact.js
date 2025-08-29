@@ -1,540 +1,485 @@
-// src/pages/contact.js
-import { useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
+import { useState } from "react";
+import Head from "next/head";
+import { motion } from "framer-motion";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Simple validation
-    if (formData.name && formData.email && formData.message) {
-      // Show success message
-      alert('Thank you for your message! We will get back to you soon. 🌸');
-      
-      // Reset form
-      setFormData({ name: '', email: '', message: '' });
-    } else {
-      alert('Please fill in all fields.');
-    }
+    setIsSubmitting(true);
+
+    // Simulate form submission
+    setTimeout(() => {
+      if (formData.name && formData.email && formData.message) {
+        alert("Thank you for your message! We will get back to you soon. 🌸");
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        alert("Please fill in all required fields.");
+      }
+      setIsSubmitting(false);
+    }, 1500);
   };
 
   return (
     <>
       <Head>
         <title>BeautyCare - Contact Us</title>
-        <meta name="description" content="Contact BeautyCare" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <meta name="description" content="Get in touch with BeautyCare for premium beauty products and customer support" />
       </Head>
 
-      <div className="contact-container">
-        {/* Navbar */}
-        <nav className="navbar">
-          <div className="nav-container">
-            <Link href="/" className="logo">
-              <div className="logo-icon">
-                <i className="fas fa-spa"></i>
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-overlay">
+          <div className="container">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="hero-content"
+            >
+              <h1>Get in Touch</h1>
+              <p>We'd love to hear from you 💌 Reach out for any questions or feedback!</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Content */}
+      <section className="contact-section">
+        <div className="container">
+          <div className="contact-grid">
+            {/* Contact Form */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="contact-form-container"
+            >
+              <div className="form-header">
+                <h2>Send us a Message</h2>
+                <p>Fill out the form below and we'll respond as soon as possible</p>
               </div>
-              <span>BeautyCare</span>
-            </Link>
-            
-            <div className="nav-links">
-              <Link href="/">Home</Link>
-              <Link href="/about">About</Link>
-              <Link href="/products">Products</Link>
-              <Link href="/contact" className="active">Contact</Link>
-            </div>
-          </div>
-        </nav>
 
-        <div className="container max-width">
-          {/* Hero Section */}
-          <div className="hero">
-            <h1>Contact Us</h1>
-            <p>We'd love to hear from you 💌 Get in touch today!</p>
-          </div>
+              <form onSubmit={handleSubmit} className="contact-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="name">Your Name *</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
 
-          {/* Content */}
-          <div className="content">
-            {/* Form Container */}
-            <div className="form-container">
-              <h2>Send us a Message</h2>
-              
-              <form onSubmit={handleSubmit} className="form">
+                  <div className="form-group">
+                    <label htmlFor="email">Your Email *</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email address"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="form-group">
-                  <label htmlFor="name">
-                    Your Name
-                  </label>
+                  <label htmlFor="subject">Subject</label>
                   <input
                     type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
                     onChange={handleChange}
-                    placeholder="Enter your full name"
-                    required
+                    placeholder="What is this regarding?"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="email">
-                    Your Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email address"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="message">
-                    Your Message
-                  </label>
+                  <label htmlFor="message">Your Message *</label>
                   <textarea
                     id="message"
                     name="message"
+                    rows="5"
                     value={formData.message}
                     onChange={handleChange}
                     placeholder="Tell us how we can help you..."
                     required
-                    rows="5"
                   ></textarea>
                 </div>
 
-                <button
+                <motion.button
                   type="submit"
-                  className="submit-button"
+                  className="submit-btn"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isSubmitting}
                 >
-                  Send Message <i className="fas fa-paper-plane"></i>
-                </button>
+                  {isSubmitting ? (
+                    <>
+                      <div className="spinner"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Message ✨"
+                  )}
+                </motion.button>
               </form>
-            </div>
+            </motion.div>
 
-            {/* Info Container */}
-            <div className="info-container">
-              <div className="contact-info">
-                <div className="contact-item">
-                  <i className="fas fa-phone"></i>
-                  <span>+1 (555) 123-4567</span>
+            {/* Contact Info */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="contact-info"
+            >
+              <div className="info-header">
+                <h2>Contact Information</h2>
+                <p>Feel free to reach out through any of these channels</p>
+              </div>
+
+              <div className="info-items">
+                <div className="info-item">
+                  <div className="info-icon">
+                    <i className="fas fa-phone"></i>
+                  </div>
+                  <div className="info-content">
+                    <h3>Phone</h3>
+                    <p>+1 (555) 123-4567</p>
+                    <span>Mon-Fri, 9am-5pm EST</span>
+                  </div>
                 </div>
-                <div className="contact-item">
-                  <i className="fas fa-envelope"></i>
-                  <span>info@beautycare.com</span>
+
+                <div className="info-item">
+                  <div className="info-icon">
+                    <i className="fas fa-envelope"></i>
+                  </div>
+                  <div className="info-content">
+                    <h3>Email</h3>
+                    <p>info@beautycare.com</p>
+                    <span>We respond within 24 hours</span>
+                  </div>
+                </div>
+
+                <div className="info-item">
+                  <div className="info-icon">
+                    <i className="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div className="info-content">
+                    <h3>Location</h3>
+                    <p>123 Beauty Street</p>
+                    <span>Care City, CC 12345</span>
+                  </div>
+                </div>
+
+                <div className="info-item">
+                  <div className="info-icon">
+                    <i className="fas fa-clock"></i>
+                  </div>
+                  <div className="info-content">
+                    <h3>Business Hours</h3>
+                    <p>Mon-Fri: 9am - 8pm</p>
+                    <span>Sat: 10am - 6pm, Sun: 11am - 4pm</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="info-item">
-                <h3><i className="fas fa-map-marker-alt"></i> Our Location</h3>
-                <p>
-                  123 Beauty Street, Cosmetic District<br />
-                  New York, NY 10001
-                </p>
+              <div className="social-section">
+                <h3>Follow Us</h3>
+                <div className="social-icons">
+                  {["facebook-f", "instagram", "twitter", "pinterest-p", "youtube"].map((icon) => (
+                    <a
+                      key={icon}
+                      href="#"
+                      className="social-icon"
+                      aria-label={icon}
+                    >
+                      <i className={`fab fa-${icon}`}></i>
+                    </a>
+                  ))}
+                </div>
               </div>
-
-              <div className="info-item">
-                <h3><i className="fas fa-clock"></i> Business Hours</h3>
-                <p>
-                  Monday - Friday: 9am - 8pm<br />
-                  Saturday: 10am - 6pm<br />
-                  Sunday: 11am - 4pm
-                </p>
-              </div>
-
-              <div className="info-item">
-                <h3><i className="fas fa-info-circle"></i> Quick Support</h3>
-                <p>
-                  For urgent inquiries, call us directly at<br />
-                  <strong>+1 (555) 123-4567</strong><br />
-                  or email <strong>support@beautycare.com</strong>
-                </p>
-              </div>
-
-              <div className="social-links">
-                <a href="#"><i className="fab fa-facebook-f"></i></a>
-                <a href="#"><i className="fab fa-instagram"></i></a>
-                <a href="#"><i className="fab fa-twitter"></i></a>
-                <a href="#"><i className="fab fa-pinterest-p"></i></a>
-              </div>
-            </div>
+            </motion.div>
           </div>
-
-          {/* Footer */}
-          <footer>
-            <p>© {new Date().getFullYear()} BeautyCare. All rights reserved 🌸</p>
-          </footer>
         </div>
-      </div>
+      </section>
 
       <style jsx>{`
-        /* Global styles */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        html, body {
-          height: 100%;
-          overflow: hidden;
-        }
-        
-        .contact-container {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%);
-          display: flex;
-          flex-direction: column;
-          color: #4a4a4a;
-          overflow: auto;
-        }
-        
-        /* Navbar */
-        .navbar {
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(10px);
-          padding: 15px 0;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-        
-        .nav-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          font-size: 24px;
-          font-weight: 700;
-          color: #ec4899;
-          text-decoration: none;
-        }
-        
-        .logo-icon {
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          border-radius: 50%;
+        .hero-section {
+          position: relative;
+          height: 400px;
+          background: url('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+          background-size: cover;
+          background-position: center;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
         }
-        
-        .nav-links {
-          display: flex;
-          gap: 30px;
-        }
-        
-        .nav-links a {
-          color: #7c2d69;
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.3s ease;
-          padding: 5px 10px;
-          border-radius: 5px;
-        }
-        
-        .nav-links a:hover {
-          color: #ec4899;
-          background: rgba(236, 72, 153, 0.1);
-        }
-        
-        .nav-links a.active {
-          color: #ec4899;
-          background: rgba(236, 72, 153, 0.1);
-        }
-        
-        .max-width {
-          max-width: 1200px;
+        .hero-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
-          margin: 0 auto;
-          padding: 20px;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
+          height: 100%;
+          background: linear-gradient(rgba(124, 45, 105, 0.8), rgba(190, 24, 93, 0.7));
         }
-        
-        /* Hero Section */
-        .hero {
+        .hero-content {
+          position: relative;
           text-align: center;
-          margin: 20px 0 30px;
+          color: white;
+          padding: 0 20px;
         }
-        
-        .hero h1 {
-          font-size: 2.2rem;
-          color: #7c2d69;
+        .hero-content h1 {
+          font-size: 3.5rem;
           margin-bottom: 15px;
           font-weight: 800;
         }
-        
-        @media (min-width: 768px) {
-          .hero h1 {
-            font-size: 2.8rem;
-          }
-        }
-        
-        .hero p {
-          font-size: 1.1rem;
-          color: #9d174d;
+        .hero-content p {
+          font-size: 1.3rem;
           max-width: 600px;
           margin: 0 auto;
-          line-height: 1.6;
+          opacity: 0.9;
         }
-        
-        @media (min-width: 768px) {
-          .hero p {
-            font-size: 1.3rem;
-          }
+
+        .contact-section {
+          padding: 80px 0;
+          background: #fdf2f8;
         }
-        
-        /* Content */
-        .content {
-          display: flex;
-          flex-direction: column;
-          gap: 30px;
-          margin-bottom: 20px;
-          flex: 1;
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px;
         }
-        
-        @media (min-width: 1024px) {
-          .content {
-            flex-direction: row;
-          }
+        .contact-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 50px;
         }
-        
-        /* Form Container */
-        .form-container {
-          flex: 1;
+
+        .contact-form-container {
           background: white;
-          border-radius: 15px;
-          padding: 25px;
-          box-shadow: 0 10px 30px rgba(236, 72, 153, 0.1);
+          border-radius: 20px;
+          padding: 40px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
-        
-        @media (min-width: 768px) {
-          .form-container {
-            padding: 30px;
-          }
+        .form-header {
+          margin-bottom: 30px;
         }
-        
-        .form-container h2 {
-          color: #ec4899;
-          margin-bottom: 20px;
-          text-align: center;
-          font-size: 1.6rem;
+        .form-header h2 {
+          font-size: 2rem;
+          color: #7c2d69;
+          margin-bottom: 10px;
         }
-        
-        @media (min-width: 768px) {
-          .form-container h2 {
-            font-size: 1.8rem;
-          }
+        .form-header p {
+          color: #6b7280;
         }
-        
-        .form {
+        .contact-form {
           display: flex;
           flex-direction: column;
           gap: 20px;
         }
-        
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+        }
         .form-group {
           display: flex;
           flex-direction: column;
-          gap: 8px;
         }
-        
         .form-group label {
           font-weight: 600;
-          color: #7c2d69;
-          font-size: 0.9rem;
+          margin-bottom: 8px;
+          color: #374151;
         }
-        
         .form-group input,
         .form-group textarea {
-          padding: 12px;
-          border: 2px solid #fbcfe8;
-          border-radius: 10px;
-          font-size: 14px;
+          padding: 15px 20px;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          font-size: 1rem;
           transition: all 0.3s ease;
+          background: #f9fafb;
         }
-        
         .form-group input:focus,
         .form-group textarea:focus {
           outline: none;
           border-color: #ec4899;
-          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+          background: white;
         }
-        
         .form-group textarea {
-          min-height: 120px;
           resize: vertical;
+          min-height: 120px;
         }
-        
-        .submit-button {
-          background: linear-gradient(135deg, #ec4899, #f472b6);
+        .submit-btn {
+          padding: 16px 32px;
+          background: #ec4899;
           color: white;
           border: none;
-          padding: 14px;
-          font-size: 16px;
+          border-radius: 12px;
+          font-size: 1.1rem;
           font-weight: 600;
-          border-radius: 10px;
           cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
           margin-top: 10px;
         }
-        
-        .submit-button:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 6px 15px rgba(236, 72, 153, 0.4);
+        .submit-btn:hover:not(:disabled) {
+          background: #db2777;
         }
-        
-        /* Info Container */
-        .info-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
+        .submit-btn:disabled {
+          opacity: 0.8;
+          cursor: not-allowed;
         }
-        
+        .spinner {
+          width: 20px;
+          height: 20px;
+          border: 2px solid transparent;
+          border-top: 2px solid white;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .contact-info {
+          background: white;
+          border-radius: 20px;
+          padding: 40px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+          height: fit-content;
+        }
+        .info-header {
+          margin-bottom: 30px;
+        }
+        .info-header h2 {
+          font-size: 2rem;
+          color: #7c2d69;
+          margin-bottom: 10px;
+        }
+        .info-header p {
+          color: #6b7280;
+        }
+        .info-items {
           display: flex;
           flex-direction: column;
-          gap: 15px;
-          background: white;
-          border-radius: 15px;
-          padding: 20px;
-          box-shadow: 0 5px 20px rgba(236, 72, 153, 0.1);
+          gap: 25px;
+          margin-bottom: 40px;
         }
-        
-        @media (min-width: 768px) {
-          .contact-info {
-            flex-direction: row;
-            justify-content: space-around;
-          }
-        }
-        
-        .contact-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: #7c2d69;
-        }
-        
-        .contact-item i {
-          font-size: 18px;
-          color: #ec4899;
-        }
-        
         .info-item {
-          background: white;
-          border-radius: 15px;
-          padding: 20px;
-          box-shadow: 0 5px 20px rgba(236, 72, 153, 0.1);
-          transition: transform 0.3s ease;
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
         }
-        
-        .info-item:hover {
-          transform: translateY(-3px);
-        }
-        
-        .info-item h3 {
-          color: #ec4899;
-          margin-bottom: 12px;
+        .info-icon {
+          width: 50px;
+          height: 50px;
+          background: #fdf2f8;
+          border-radius: 50%;
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 1.1rem;
+          justify-content: center;
+          color: #ec4899;
+          font-size: 1.2rem;
+          flex-shrink: 0;
         }
-        
-        .info-item p {
+        .info-content h3 {
+          font-size: 1.1rem;
+          color: #374151;
+          margin-bottom: 5px;
+        }
+        .info-content p {
+          font-weight: 600;
           color: #7c2d69;
-          line-height: 1.6;
+          margin-bottom: 3px;
+        }
+        .info-content span {
+          color: #6b7280;
           font-size: 0.9rem;
         }
-        
-        .social-links {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-          margin-top: 15px;
+
+        .social-section {
+          border-top: 1px solid #f3f4f6;
+          padding-top: 30px;
         }
-        
-        .social-links a {
-          width: 40px;
-          height: 40px;
+        .social-section h3 {
+          font-size: 1.2rem;
+          color: #374151;
+          margin-bottom: 15px;
+          text-align: center;
+        }
+        .social-icons {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+        }
+        .social-icon {
+          width: 45px;
+          height: 45px;
+          background: #fdf2f8;
           border-radius: 50%;
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          color: white;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 16px;
+          color: #7c2d69;
+          font-size: 1.1rem;
           transition: all 0.3s ease;
         }
-        
-        .social-links a:hover {
+        .social-icon:hover {
+          background: #ec4899;
+          color: white;
           transform: translateY(-3px);
-          box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
         }
-        
-        /* Footer */
-        footer {
-          text-align: center;
-          padding: 20px 0;
-          color: #7c2d69;
-          margin-top: auto;
+
+        @media (max-width: 968px) {
+          .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+          }
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+          .hero-content h1 {
+            font-size: 2.5rem;
+          }
         }
-        
-        /* Responsive adjustments */
-        @media (max-height: 800px) {
-          .hero {
-            margin: 10px 0 20px;
+        @media (max-width: 640px) {
+          .contact-form-container,
+          .contact-info {
+            padding: 25px;
           }
-          
-          .hero h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+          .hero-content h1 {
+            font-size: 2rem;
           }
-          
-          .hero p {
-            font-size: 1rem;
-          }
-          
-          .form-container, .info-item {
-            padding: 15px;
-          }
-          
-          .form-group input,
-          .form-group textarea {
-            padding: 10px;
-          }
-          
-          .submit-button {
-            padding: 12px;
+          .hero-content p {
+            font-size: 1.1rem;
           }
         }
       `}</style>

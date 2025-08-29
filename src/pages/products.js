@@ -1,60 +1,175 @@
-// src/pages/products.js
-import { useState, useEffect } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import Layout from "@/components/Layout";
+import ProductCard from "@/components/ProductCard";
+import { motion, AnimatePresence } from "framer-motion";
 
-// This is a sample product data - replace with your actual data source
+// Sample product data with categories and more details
 const sampleProducts = [
   {
     id: 1,
-    name: 'Luxury Face Cream',
+    name: "Luxury Face Cream",
     price: 49.99,
-    image: '/images/product1.jpg',
-    description: 'Hydrating cream with natural ingredients'
+    image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Hydrating cream with natural ingredients for radiant skin",
+    category: "Skincare",
+    rating: 4.8,
+    featured: true
   },
   {
     id: 2,
-    name: 'Revitalizing Serum',
+    name: "Revitalizing Serum",
     price: 59.99,
-    image: '/images/product2.jpg',
-    description: 'Anti-aging serum with vitamin C'
+    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Anti-aging serum with vitamin C and hyaluronic acid",
+    category: "Skincare",
+    rating: 4.7,
+    featured: true
   },
   {
     id: 3,
-    name: 'Gentle Cleanser',
+    name: "Gentle Cleanser",
     price: 29.99,
-    image: '/images/product3.jpg',
-    description: 'Daily cleanser for all skin types'
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Daily cleanser for all skin types, removes impurities gently",
+    category: "Skincare",
+    rating: 4.5,
+    featured: false
   },
   {
     id: 4,
-    name: 'Nourishing Mask',
+    name: "Nourishing Mask",
     price: 39.99,
-    image: '/images/product4.jpg',
-    description: 'Weekly treatment mask for hydration'
+    image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Weekly treatment mask for deep hydration and nourishment",
+    category: "Skincare",
+    rating: 4.6,
+    featured: false
+  },
+  {
+    id: 5,
+    name: "Luxury Lipstick Set",
+    price: 45.99,
+    image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Premium lipstick set with 6 long-lasting shades",
+    category: "Makeup",
+    rating: 4.9,
+    featured: true
+  },
+  {
+    id: 6,
+    name: "Volume Mascara",
+    price: 32.99,
+    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Lengthening and volumizing mascara for dramatic lashes",
+    category: "Makeup",
+    rating: 4.4,
+    featured: false
+  },
+  {
+    id: 7,
+    name: "Scented Body Lotion",
+    price: 36.99,
+    image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Luxurious body lotion with delicate floral fragrance",
+    category: "Body Care",
+    rating: 4.7,
+    featured: false
+  },
+  {
+    id: 8,
+    name: "Hair Repair Serum",
+    price: 42.99,
+    image: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    description: "Intensive repair serum for damaged and frizzy hair",
+    category: "Hair Care",
+    rating: 4.8,
+    featured: true
   }
 ];
 
+// Extract unique categories
+const categories = [...new Set(sampleProducts.map(product => product.category))];
+
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortOption, setSortOption] = useState("featured");
 
   // Simulate data fetching
   useEffect(() => {
     const fetchProducts = async () => {
-      // In a real app, you would fetch from an API
-      setProducts(sampleProducts);
-      setLoading(false);
+      // Simulate API delay
+      setTimeout(() => {
+        setProducts(sampleProducts);
+        setFilteredProducts(sampleProducts);
+        setLoading(false);
+      }, 800);
     };
-
     fetchProducts();
   }, []);
 
+  // Filter and sort products
+  useEffect(() => {
+    let result = [...products];
+    
+    // Filter by search query
+    if (searchQuery) {
+      result = result.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Filter by category
+    if (selectedCategory !== "All") {
+      result = result.filter(product => product.category === selectedCategory);
+    }
+    
+    // Sort products
+    switch(sortOption) {
+      case "price-low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "name":
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "rating":
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      case "featured":
+      default:
+        // Featured first, then by name
+        result.sort((a, b) => {
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          return a.name.localeCompare(b.name);
+        });
+    }
+    
+    setFilteredProducts(result);
+  }, [products, searchQuery, selectedCategory, sortOption]);
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("All");
+    setSortOption("featured");
+  };
+
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-      </div>
+      <Layout>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading our luxurious products...</p>
+        </div>
+      </Layout>
     );
   }
 
@@ -62,292 +177,318 @@ export default function Products() {
     <>
       <Head>
         <title>BeautyCare - Our Products</title>
-        <meta name="description" content="Discover BeautyCare's premium products" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <meta
+          name="description"
+          content="Discover BeautyCare's premium collection of beauty and skincare products"
+        />
       </Head>
 
-      <div className="products-page">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <motion.div 
+          className="hero-content"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1>Our Luxury Collection</h1>
+          <p>Indulge in our premium beauty products crafted with care ✨</p>
+        </motion.div>
+      </section>
+
+      {/* Filters and Search Section */}
+      <section className="filters-section">
         <div className="container">
-          {/* Header */}
-          <header className="page-header">
-            <Link href="/" className="logo">
-              <div className="logo-icon">
-                <i className="fas fa-spa"></i>
+          <div className="filters-grid">
+            {/* Search Input */}
+            <div className="search-container">
+              <div className="search-input">
+                <i className="fas fa-search"></i>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <span>BeautyCare</span>
-            </Link>
-            
-            <nav className="navigation">
-              <Link href="/">Home</Link>
-              <Link href="/about">About</Link>
-              <Link href="/contact">Contact</Link>
-            </nav>
-          </header>
+            </div>
 
-          {/* Hero Section */}
-          <div className="hero-section">
-            <h1>Our Products</h1>
-            <p>Discover our premium collection of beauty products ✨</p>
+            {/* Category Filter */}
+            <div className="filter-group">
+              <label>Category</label>
+              <select 
+                value={selectedCategory} 
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="All">All Categories</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Options */}
+            <div className="filter-group">
+              <label>Sort By</label>
+              <select 
+                value={sortOption} 
+                onChange={(e) => setSortOption(e.target.value)}
+              >
+                <option value="featured">Featured</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="price-low">Price (Low to High)</option>
+                <option value="price-high">Price (High to Low)</option>
+                <option value="rating">Rating</option>
+              </select>
+            </div>
+
+            {/* Reset Filters */}
+            <button className="reset-btn" onClick={resetFilters}>
+              Reset Filters
+            </button>
           </div>
 
-          {/* Products Grid */}
-          <div className="products-grid">
-            {products.map(product => (
-              <div key={product.id} className="product-card">
-                <div className="product-image">
-                  <div className="image-placeholder">
-                    <i className="fas fa-spa"></i>
-                  </div>
-                </div>
-                <h3>{product.name}</h3>
-                <p className="product-description">{product.description}</p>
-                <div className="product-footer">
-                  <span className="product-price">${product.price}</span>
-                  <button className="add-to-cart-btn">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Results Count */}
+          <div className="results-count">
+            <p>
+              Showing {filteredProducts.length} of {products.length} products
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+            </p>
           </div>
-
-          {/* Footer */}
-          <footer className="page-footer">
-            <p>© {new Date().getFullYear()} BeautyCare. All rights reserved 🌸</p>
-          </footer>
         </div>
-      </div>
+      </section>
+
+      {/* Products Grid */}
+      <section className="products-section">
+        <div className="container">
+          <AnimatePresence>
+            {filteredProducts.length > 0 ? (
+              <motion.div 
+                className="products-grid"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {filteredProducts.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div 
+                className="no-products"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <i className="fas fa-search"></i>
+                <h3>No products found</h3>
+                <p>Try adjusting your search or filter criteria</p>
+                <button onClick={resetFilters}>Reset Filters</button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
 
       <style jsx>{`
-        /* Global styles */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .products-page {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%);
-          padding: 20px;
-        }
-        
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-        
-        /* Loading */
         .loading-container {
-          min-height: 100vh;
+          min-height: 80vh;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
         }
-        
         .loading-spinner {
-          width: 48px;
-          height: 48px;
-          border: 3px solid #f472b6;
+          width: 60px;
+          height: 60px;
+          border: 4px solid rgba(236, 72, 153, 0.2);
           border-radius: 50%;
-          border-top-color: transparent;
+          border-top-color: #ec4899;
           animation: spin 1s linear infinite;
+          margin-bottom: 20px;
         }
-        
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        
-        /* Header */
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 40px;
-          flex-direction: column;
-          gap: 20px;
+        .loading-container p {
+          color: #7c2d69;
+          font-size: 1.1rem;
         }
-        
-        @media (min-width: 768px) {
-          .page-header {
-            flex-direction: row;
-          }
-        }
-        
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          font-size: 24px;
-          font-weight: 700;
-          color: #ec4899;
-          text-decoration: none;
-        }
-        
-        .logo-icon {
-          width: 50px;
-          height: 50px;
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+
+        .hero-section {
+          background: linear-gradient(135deg, rgba(124, 45, 105, 0.9) 0%, rgba(190, 24, 93, 0.85) 100%), 
+                     url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+          background-size: cover;
+          background-position: center;
+          padding: 100px 20px;
+          text-align: center;
           color: white;
         }
-        
-        .navigation {
-          display: flex;
-          gap: 24px;
-        }
-        
-        .navigation a {
-          color: #7c2d69;
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.3s ease;
-        }
-        
-        .navigation a:hover {
-          color: #ec4899;
-        }
-        
-        /* Hero Section */
-        .hero-section {
-          text-align: center;
-          margin-bottom: 60px;
-        }
-        
-        .hero-section h1 {
-          font-size: 2.5rem;
-          color: #7c2d69;
+        .hero-content h1 {
+          font-size: 3rem;
           margin-bottom: 16px;
           font-weight: 800;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
-        @media (min-width: 768px) {
-          .hero-section h1 {
-            font-size: 3.5rem;
-          }
-        }
-        
-        .hero-section p {
-          font-size: 1.2rem;
-          color: #9d174d;
+        .hero-content p {
+          font-size: 1.3rem;
           max-width: 700px;
           margin: 0 auto;
           line-height: 1.6;
+          opacity: 0.9;
         }
-        
-        @media (min-width: 768px) {
-          .hero-section p {
-            font-size: 1.5rem;
-          }
+
+        .filters-section {
+          padding: 40px 0;
+          background: #fff;
+          border-bottom: 1px solid #f3f4f6;
         }
-        
-        /* Products Grid */
-        .products-grid {
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px;
+        }
+        .filters-grid {
           display: grid;
-          grid-template-columns: 1fr;
-          gap: 30px;
-          margin-bottom: 60px;
+          grid-template-columns: 2fr 1fr 1fr auto;
+          gap: 20px;
+          align-items: end;
         }
-        
-        @media (min-width: 640px) {
-          .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+        .search-container {
+          position: relative;
         }
-        
-        @media (min-width: 1024px) {
-          .products-grid {
-            grid-template-columns: repeat(4, 1fr);
-          }
-        }
-        
-        .product-card {
-          background: white;
-          border-radius: 20px;
-          padding: 24px;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        .search-input {
+          display: flex;
+          align-items: center;
+          background: #f9fafb;
+          border-radius: 12px;
+          padding: 12px 16px;
+          border: 1px solid #e5e7eb;
           transition: all 0.3s ease;
+        }
+        .search-input:focus-within {
+          border-color: #ec4899;
+          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+        .search-input i {
+          color: #9ca3af;
+          margin-right: 10px;
+        }
+        .search-input input {
+          border: none;
+          background: transparent;
+          width: 100%;
+          font-size: 1rem;
+          outline: none;
+        }
+        .filter-group {
           display: flex;
           flex-direction: column;
         }
-        
-        .product-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .product-image {
-          height: 192px;
-          background-color: #fce7f3;
-          border-radius: 12px;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .image-placeholder {
-          width: 96px;
-          height: 96px;
-          background-color: #fbcfe8;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #ec4899;
-          font-size: 2rem;
-        }
-        
-        .product-card h3 {
-          font-size: 1.25rem;
+        .filter-group label {
           font-weight: 600;
-          color: #7c2d69;
           margin-bottom: 8px;
+          color: #374151;
         }
-        
-        .product-description {
-          color: #9d174d;
-          margin-bottom: 16px;
-          flex-grow: 1;
+        .filter-group select {
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: 1px solid #e5e7eb;
+          background: #f9fafb;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
         }
-        
-        .product-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+        .filter-group select:focus {
+          border-color: #ec4899;
+          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
         }
-        
-        .product-price {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: #7c2d69;
+        .reset-btn {
+          padding: 12px 20px;
+          background: #f3f4f6;
+          border: none;
+          border-radius: 12px;
+          font-weight: 600;
+          color: #4b5563;
+          cursor: pointer;
+          transition: all 0.3s ease;
         }
-        
-        .add-to-cart-btn {
+        .reset-btn:hover {
+          background: #e5e7eb;
+          color: #374151;
+        }
+        .results-count {
+          margin-top: 20px;
+          color: #6b7280;
+        }
+
+        .products-section {
+          padding: 60px 0;
+          background: linear-gradient(to bottom, #fdf2f8 0%, #fce7f3 100%);
+          min-height: 50vh;
+        }
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 30px;
+        }
+        .no-products {
+          text-align: center;
+          padding: 60px 20px;
+          color: #6b7280;
+        }
+        .no-products i {
+          font-size: 3rem;
+          color: #d1d5db;
+          margin-bottom: 20px;
+        }
+        .no-products h3 {
+          font-size: 1.5rem;
+          margin-bottom: 10px;
+          color: #374151;
+        }
+        .no-products button {
+          margin-top: 20px;
+          padding: 12px 24px;
           background: #ec4899;
           color: white;
           border: none;
-          padding: 8px 16px;
           border-radius: 8px;
+          font-weight: 600;
           cursor: pointer;
-          font-weight: 500;
-          transition: background-color 0.3s ease;
+          transition: all 0.3s ease;
         }
-        
-        .add-to-cart-btn:hover {
+        .no-products button:hover {
           background: #db2777;
         }
-        
-        /* Footer */
-        .page-footer {
-          text-align: center;
-          padding: 30px 0;
-          color: #7c2d69;
+
+        @media (max-width: 968px) {
+          .filters-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+          }
+          .hero-content h1 {
+            font-size: 2.5rem;
+          }
+          .hero-content p {
+            font-size: 1.1rem;
+          }
+        }
+        @media (max-width: 640px) {
+          .filters-grid {
+            grid-template-columns: 1fr;
+          }
+          .hero-content h1 {
+            font-size: 2rem;
+          }
         }
       `}</style>
     </>

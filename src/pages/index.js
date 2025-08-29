@@ -1,446 +1,98 @@
-import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Layout from "@/components/Layout";
+import ProductCard from "@/components/ProductCard";
+import { motion } from "framer-motion";
 
-const Layout = ({ children }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  return (
-    <>
-      {/* Navbar */}
-      <nav className={`navbar ${isScrolled ? "scrolled" : ""}`}>
-        <div className="nav-container">
-          <Link href="/" className="logo">
-            <div className="logo-icon">
-              <i className="fas fa-spa"></i>
-            </div>
-            <span>BeautyCare</span>
-          </Link>
-
-          <div className={`nav-links ${isMobileMenuOpen ? "active" : ""}`}>
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-              Home
-            </Link>
-            <Link href="/about" onClick={() => setIsMobileMenuOpen(false)}>
-              About
-            </Link>
-            <Link href="/products" onClick={() => setIsMobileMenuOpen(false)}>
-              Products
-            </Link>
-            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-              Contact
-            </Link>
-          </div>
-
-          <button
-            className="mobile-menu-toggle"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
-      </nav>
-
-      <main>{children}</main>
-
-      <style jsx>{`
-        /* Navbar Styles */
-        .navbar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          padding: 15px 0;
-          z-index: 1000;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .navbar.scrolled {
-          padding: 10px 0;
-          background: rgba(255, 255, 255, 0.98);
-          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 24px;
-          font-weight: 700;
-          color: #ec4899;
-          text-decoration: none;
-          transition: transform 0.3s ease;
-        }
-
-        .logo:hover {
-          transform: scale(1.05);
-        }
-
-        .logo-icon {
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-        }
-
-        .nav-links {
-          display: flex;
-          gap: 30px;
-        }
-
-        .nav-links a {
-          color: #7c2d69;
-          text-decoration: none;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          padding: 8px 0;
-          position: relative;
-        }
-
-        .nav-links a:after {
-          content: "";
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 0;
-          height: 2px;
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover {
-          color: #ec4899;
-        }
-
-        .nav-links a:hover:after {
-          width: 100%;
-        }
-
-        .mobile-menu-toggle {
-          display: none;
-          flex-direction: column;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 5px;
-        }
-
-        .mobile-menu-toggle span {
-          width: 25px;
-          height: 3px;
-          background: #7c2d69;
-          margin: 3px 0;
-          transition: 0.3s;
-          border-radius: 2px;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-          .mobile-menu-toggle {
-            display: flex;
-          }
-
-          .nav-links {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: white;
-            flex-direction: column;
-            padding: 20px;
-            gap: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            transform: translateY(-100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-          }
-
-          .nav-links.active {
-            transform: translateY(0);
-            opacity: 1;
-          }
-
-          .nav-links a {
-            padding: 12px;
-            border-radius: 5px;
-          }
-
-          .nav-links a:hover {
-            background: rgba(236, 72, 153, 0.1);
-          }
-        }
-      `}</style>
-    </>
-  );
-};
-
-const ProductCard = ({ product }) => {
-  return (
-    <div className="product-card">
-      <div className="product-image">
-        <div className="image-placeholder">
-          <i className="fas fa-spa"></i>
-        </div>
-        <div className="product-overlay">
-          <button className="quick-view-btn">Quick View</button>
-        </div>
-      </div>
-      <h3>{product.name}</h3>
-      <p className="product-description">{product.description}</p>
-      <div className="product-footer">
-        <span className="product-price">${product.price}</span>
-        <button className="add-to-cart-btn">
-          <i className="fas fa-shopping-cart"></i> Add to Cart
-        </button>
-      </div>
-
-      <style jsx>{`
-        .product-card {
-          background: white;
-          border-radius: 15px;
-          padding: 20px;
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .product-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-image {
-          height: 200px;
-          background: linear-gradient(135deg, #fce7f3, #fbcfe8);
-          border-radius: 10px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .image-placeholder {
-          width: 80px;
-          height: 80px;
-          background: rgba(255, 255, 255, 0.7);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #ec4899;
-          font-size: 2rem;
-        }
-
-        .product-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(236, 72, 153, 0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .product-card:hover .product-overlay {
-          opacity: 1;
-        }
-
-        .quick-view-btn {
-          background: white;
-          color: #ec4899;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 25px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: transform 0.3s ease;
-        }
-
-        .quick-view-btn:hover {
-          transform: scale(1.05);
-        }
-
-        .product-card h3 {
-          font-size: 18px;
-          color: #7c2d69;
-          margin-bottom: 10px;
-        }
-
-        .product-description {
-          color: #9d174d;
-          margin-bottom: 15px;
-          font-size: 14px;
-          line-height: 1.5;
-        }
-
-        .product-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .product-price {
-          font-size: 18px;
-          font-weight: 700;
-          color: #7c2d69;
-        }
-
-        .add-to-cart-btn {
-          background: #ec4899;
-          color: white;
-          border: none;
-          padding: 8px 15px;
-          border-radius: 20px;
-          cursor: pointer;
-          font-weight: 500;
-          font-size: 14px;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          transition: all 0.3s ease;
-        }
-
-        .add-to-cart-btn:hover {
-          background: #db2777;
-          transform: translateY(-2px);
-        }
-      `}</style>
-    </div>
-  );
-};
-
-const Home = () => {
+export default function Home() {
   const featuredProducts = [
-    {
-      id: 1,
-      name: "Hydrating Face Cream",
-      description: "Deeply moisturizes and nourishes your skin",
-      price: 25.99,
-      image: "/images/face-cream.jpg",
+    { 
+      id: 1, 
+      name: "Hydrating Face Cream", 
+      description: "Deeply moisturizes and rejuvenates skin", 
+      price: 25.99, 
+      image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+      category: "Skincare",
+      rating: 4.8
     },
-    {
-      id: 2,
-      name: "Vitamin C Serum",
-      description: "Brightens and evens out skin tone",
-      price: 34.99,
-      image: "/images/serum.jpg",
+    { 
+      id: 2, 
+      name: "Vitamin C Serum", 
+      description: "Brightens skin and reduces dark spots", 
+      price: 34.99, 
+      image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+      category: "Skincare",
+      rating: 4.7
     },
-    {
-      id: 3,
-      name: "Matte Lipstick",
-      description: "Long-lasting color with a velvety finish",
-      price: 18.99,
-      image: "/images/lipstick.jpg",
-    },
-    {
-      id: 4,
-      name: "Daily Moisturizer",
-      description: "Lightweight hydration for everyday use",
-      price: 22.99,
-      image: "/images/moisturizer.jpg",
+    { 
+      id: 3, 
+      name: "Matte Lipstick", 
+      description: "Velvety finish with long-lasting color", 
+      price: 18.99, 
+      image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+      category: "Makeup",
+      rating: 4.6
     },
   ];
 
+  const benefits = [
+    {
+      icon: "🌸",
+      title: "Natural Ingredients",
+      description: "Our products are crafted with the finest natural ingredients for your skin's health."
+    },
+    {
+      icon: "✨",
+      title: "Visible Results",
+      description: "Experience noticeable improvements in your skin's texture and appearance."
+    },
+    {
+      icon: "💚",
+      title: "Cruelty-Free",
+      description: "We never test on animals and are committed to ethical beauty practices."
+    }
+  ];
+
   return (
-    <Layout>
+    <>
       <Head>
-        <title>BeautyCare - Home</title>
-        <meta
-          name="description"
-          content="Discover the best beauty and self-care products"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
+        <title>BeautyCare - Premium Skincare & Beauty Products</title>
+        <meta name="description" content="Discover premium skincare and beauty products crafted with care for your natural beauty journey." />
       </Head>
 
       {/* Hero Section */}
       <section className="hero">
-        <div className="hero-content">
-          <h1>Discover Your Natural Beauty</h1>
-          <p>
-            Premium skincare and beauty products crafted with natural
-            ingredients for your self-care routine.
-          </p>
-          <div className="hero-buttons">
-            <Link href="/products" className="btn primary">
-              Shop Now
-            </Link>
-            <Link href="/about" className="btn secondary">
-              Learn More
-            </Link>
-          </div>
-        </div>
-        <div className="hero-visual">
-          <div className="floating-product">
-            <div className="product-circle">
-              <i className="fas fa-spa"></i>
-            </div>
-          </div>
-          <div className="floating-product delay-1">
-            <div className="product-circle">
-              <i className="fas fa-cube"></i>
-            </div>
-          </div>
-          <div className="floating-product delay-2">
-            <div className="product-circle">
-              <i className="fas fa-gem"></i>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products Section */}
-      <section className="featured-products">
-        <div className="container">
-          <div className="section-header">
-            <h2>Featured Products</h2>
-            <p>Our most loved beauty essentials</p>
-          </div>
-          <div className="products-grid">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          <div className="center-button">
-            <Link href="/products" className="btn primary">
-              View All Products
-            </Link>
+        <div className="hero-background">
+          <div className="container">
+            <motion.div 
+              className="hero-content"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <h1>Discover Your Natural Beauty</h1>
+              <p>Premium skincare & beauty products crafted with care and passion ✨</p>
+              <div className="buttons">
+                <Link href="/products">
+                  <motion.span 
+                    className="btn primary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Shop Now
+                  </motion.span>
+                </Link>
+                <Link href="/about">
+                  <motion.span 
+                    className="btn secondary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Learn More
+                  </motion.span>
+                </Link>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -448,374 +100,336 @@ const Home = () => {
       {/* Benefits Section */}
       <section className="benefits">
         <div className="container">
-          <div className="section-header">
-            <h2>Why Choose Us</h2>
-            <p>We're committed to your beauty and wellness</p>
-          </div>
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            Why Choose BeautyCare?
+          </motion.h2>
           <div className="benefits-grid">
-            <div className="benefit-item">
-              <div className="benefit-icon">🌿</div>
-              <h3>Natural Ingredients</h3>
-              <p>
-                Our products are made with natural, sustainably sourced
-                ingredients.
-              </p>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon">✨</div>
-              <h3>Premium Quality</h3>
-              <p>
-                We ensure the highest quality standards in all our products.
-              </p>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon">🚚</div>
-              <h3>Free Shipping</h3>
-              <p>Enjoy free shipping on all orders over $50.</p>
-            </div>
-            <div className="benefit-item">
-              <div className="benefit-icon">💖</div>
-              <h3>Cruelty-Free</h3>
-              <p>
-                All our products are cruelty-free and never tested on animals.
-              </p>
-            </div>
+            {benefits.map((benefit, index) => (
+              <motion.div 
+                key={index}
+                className="benefit-card"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+              >
+                <div className="benefit-icon">{benefit.icon}</div>
+                <h3>{benefit.title}</h3>
+                <p>{benefit.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* Featured Products */}
+      <section className="featured">
+        <div className="container">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            Featured Products
+          </motion.h2>
+          <motion.p 
+            className="section-subtitle"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            Discover our most loved beauty essentials
+          </motion.p>
+          <div className="products-grid">
+            {featuredProducts.map((product, i) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -10 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </div>
+          <motion.div 
+            className="view-all"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <Link href="/products">
+              <span className="view-all-btn">View All Products</span>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="cta">
+        <div className="container">
+          <motion.div 
+            className="cta-content"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2>Join Our Beauty Community</h2>
+            <p>Subscribe to our newsletter for exclusive offers, beauty tips, and early access to new products.</p>
+            <div className="cta-form">
+              <input type="email" placeholder="Your email address" />
+              <button>Subscribe</button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       <style jsx>{`
-        /* Global Styles */
-        :root {
-          --primary: #db2777; /* darker pink */
-          --primary-light: #f9a8d4;
-          --secondary: #6b214d;
-          --light: #fdf2f8;
-          --white: #ffffff;
-          --text: #3a3a3a;
+        .hero {
+          position: relative;
+          height: 100vh;
+          min-height: 600px;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
         }
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
+        .hero-background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(rgba(124, 45, 105, 0.7), rgba(124, 45, 105, 0.7)), 
+                     url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+          background-size: cover;
+          background-position: center;
         }
-
-        body {
-          font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-          color: var(--text);
-          line-height: 1.6;
-          overflow-x: hidden;
-        }
-
-        .container {
-          max-width: 1200px;
+        .hero-content {
+          position: relative;
+          text-align: center;
+          color: white;
+          max-width: 800px;
           margin: 0 auto;
           padding: 0 20px;
         }
-
-        section {
-          padding: 80px 0;
-        }
-
-        /* Hero Section */
-        .hero {
-          min-height: 100vh;
-          background: linear-gradient(
-              135deg,
-              rgba(255, 182, 193, 0.8),
-              rgba(255, 182, 193, 0.8)
-            ),
-            url("/images/hero-bg.jpg");
-          background-size: cover;
-          background-position: center;
-          display: flex;
-          align-items: center;
-          position: relative;
-          padding: 100px 0 60px;
-          overflow: hidden;
-        }
-
-        .hero-content {
-          max-width: 600px;
-          padding: 0 20px;
-          z-index: 2;
-        }
-
         .hero-content h1 {
           font-size: 3.5rem;
           margin-bottom: 20px;
-          color: var(--secondary);
           font-weight: 800;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-
         .hero-content p {
-          font-size: 1.2rem;
-          margin-bottom: 30px;
-          color: var(--secondary);
+          font-size: 1.4rem;
+          margin-bottom: 40px;
+          opacity: 0.9;
         }
-
-        .hero-buttons {
+        .buttons {
           display: flex;
-          gap: 15px;
+          gap: 20px;
+          justify-content: center;
+          flex-wrap: wrap;
         }
-
         .btn {
-          padding: 12px 30px;
-          border-radius: 30px;
-          text-decoration: none;
+          padding: 16px 32px;
+          border-radius: 50px;
           font-weight: 600;
-          transition: all 0.3s ease;
+          font-size: 1.1rem;
+          cursor: pointer;
           display: inline-block;
+          text-decoration: none;
+          transition: all 0.3s ease;
         }
-
         .btn.primary {
-          background: var(--primary);
+          background: #ec4899;
           color: white;
-          box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+          box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
         }
-
-        .btn.primary:hover {
-          background: #db2777;
-          transform: translateY(-3px);
-          box-shadow: 0 6px 15px rgba(236, 72, 153, 0.4);
-        }
-
         .btn.secondary {
           background: transparent;
-          color: var(--secondary);
-          border: 2px solid var(--primary);
-        }
-
-        .btn.secondary:hover {
-          background: var(--primary);
           color: white;
-          transform: translateY(-3px);
+          border: 2px solid white;
+        }
+        .btn.primary:hover {
+          background: #db2777;
+          transform: translateY(-2px);
+        }
+        .btn.secondary:hover {
+          background: rgba(255, 255, 255, 0.1);
+          transform: translateY(-2px);
         }
 
-        .hero-visual {
-          position: absolute;
-          right: 10%;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 400px;
-          height: 400px;
-        }
-
-        .floating-product {
-          position: absolute;
-          animation: float 5s ease-in-out infinite;
-        }
-
-        .floating-product.delay-1 {
-          animation-delay: 1.5s;
-          top: 20%;
-          right: 10%;
-        }
-
-        .floating-product.delay-2 {
-          animation-delay: 2.5s;
-          bottom: 20%;
-          right: 30%;
-        }
-
-        .product-circle {
-          width: 80px;
-          height: 80px;
-          background: rgba(255, 255, 255, 0.9);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-          color: var(--primary);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-
-        /* Featured Products */
-        .featured-products {
-          background: var(--white);
-        }
-
-        .section-header {
-          text-align: center;
-          margin-bottom: 50px;
-        }
-
-        .section-header h2 {
-          font-size: 2.5rem;
-          color: var(--secondary);
-          margin-bottom: 15px;
-        }
-
-        .section-header p {
-          font-size: 1.1rem;
-          color: var(--text);
-          max-width: 600px;
-          margin: 0 auto;
-        }
-
-        .products-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 30px;
-          margin-bottom: 50px;
-        }
-
-        .center-button {
-          text-align: center;
-        }
-
-        /* Benefits Section */
         .benefits {
-          background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+          padding: 100px 0;
+          background: #fdf2f8;
         }
-
+        .benefits h2 {
+          text-align: center;
+          font-size: 2.5rem;
+          color: #7c2d69;
+          margin-bottom: 60px;
+          font-weight: 700;
+        }
         .benefits-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 40px;
         }
-
-        .benefit-item {
+        .benefit-card {
           text-align: center;
           padding: 40px 30px;
-          background: var(--white);
-          border-radius: 15px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
           transition: all 0.3s ease;
         }
-
-        .benefit-item:hover {
-          transform: translateY(-10px);
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        .benefit-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
         }
-
         .benefit-icon {
           font-size: 3rem;
           margin-bottom: 20px;
         }
-
-        .benefit-item h3 {
+        .benefit-card h3 {
+          font-size: 1.5rem;
+          color: #7c2d69;
           margin-bottom: 15px;
-          color: var(--secondary);
-          font-size: 1.3rem;
+        }
+        .benefit-card p {
+          color: #6b7280;
+          line-height: 1.6;
         }
 
-        /* Newsletter Section */
-        .newsletter {
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          color: white;
+        .featured {
+          padding: 100px 0;
+          background: white;
+        }
+        .featured h2 {
           text-align: center;
-        }
-
-        .newsletter-content h2 {
-          font-size: 2.2rem;
+          font-size: 2.5rem;
+          color: #7c2d69;
           margin-bottom: 15px;
+          font-weight: 700;
         }
-
-        .newsletter-content p {
-          margin-bottom: 30px;
-          font-size: 1.1rem;
+        .section-subtitle {
+          text-align: center;
+          font-size: 1.2rem;
+          color: #9d174d;
+          margin-bottom: 60px;
           max-width: 600px;
           margin-left: auto;
           margin-right: auto;
         }
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 30px;
+          margin-bottom: 50px;
+        }
+        .view-all {
+          text-align: center;
+        }
+        .view-all-btn {
+          display: inline-block;
+          padding: 16px 40px;
+          background: transparent;
+          color: #ec4899;
+          border: 2px solid #ec4899;
+          border-radius: 50px;
+          font-weight: 600;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+        .view-all-btn:hover {
+          background: #ec4899;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+        }
 
-        .newsletter-form {
+        .cta {
+          padding: 100px 0;
+          background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+          text-align: center;
+        }
+        .cta-content {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .cta-content h2 {
+          font-size: 2.5rem;
+          color: #7c2d69;
+          margin-bottom: 20px;
+          font-weight: 700;
+        }
+        .cta-content p {
+          font-size: 1.2rem;
+          color: #9d174d;
+          margin-bottom: 40px;
+          line-height: 1.6;
+        }
+        .cta-form {
           display: flex;
+          gap: 10px;
           max-width: 500px;
           margin: 0 auto;
         }
-
-        .newsletter-form input {
+        .cta-form input {
           flex: 1;
-          padding: 15px 20px;
+          padding: 16px 20px;
           border: none;
-          border-radius: 30px 0 0 30px;
+          border-radius: 50px;
           font-size: 1rem;
+          outline: none;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-
-        .newsletter-form button {
-          padding: 15px 30px;
-          background: var(--secondary);
+        .cta-form button {
+          padding: 16px 30px;
+          background: #ec4899;
           color: white;
           border: none;
-          border-radius: 0 30px 30px 0;
+          border-radius: 50px;
           font-weight: 600;
           cursor: pointer;
-          transition: background 0.3s ease;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
         }
-
-        .newsletter-form button:hover {
-          background: #5a2257;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-          .hero-content h1 {
-            font-size: 2.8rem;
-          }
-
-          .hero-visual {
-            right: 5%;
-            width: 300px;
-            height: 300px;
-          }
+        .cta-form button:hover {
+          background: #db2777;
+          transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
-          .hero {
-            text-align: center;
-            padding: 120px 0 60px;
-          }
-
-          .hero-content {
-            margin: 0 auto;
-          }
-
           .hero-content h1 {
-            font-size: 2.3rem;
+            font-size: 2.5rem;
           }
-
-          .hero-buttons {
+          .hero-content p {
+            font-size: 1.1rem;
+          }
+          .buttons {
             flex-direction: column;
             align-items: center;
           }
-
-          .hero-visual {
-            display: none;
-          }
-
-          .benefits-grid,
-          .products-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .newsletter-form {
+          .cta-form {
             flex-direction: column;
-            gap: 15px;
           }
-
-          .newsletter-form input,
-          .newsletter-form button {
-            border-radius: 30px;
-            width: 100%;
+          .benefits, .featured, .cta {
+            padding: 60px 0;
           }
         }
       `}</style>
-    </Layout>
+    </>
   );
-};
-
-export default Home;
+}
