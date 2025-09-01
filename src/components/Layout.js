@@ -147,9 +147,9 @@ export default function Layout({ children }) {
             <div className="footer-section">
               <h4>Contact Info</h4>
               <ul className="contact-info">
-                <li><i className="fas fa-envelope"></i> info@beautycare.com</li>
-                <li><i className="fas fa-phone"></i> +1 (555) 123-4567</li>
-                <li><i className="fas fa-map-marker-alt"></i> 123 Beauty Street, Care City</li>
+                <li><i className="fas fa-envelope"></i> subhansuunnyproducts@gmail.com</li>
+                <li><i className="fas fa-phone"></i> +92 3297159055</li>
+                <li><i className="fas fa-map-marker-alt"></i> Business center Citi hosuing silakot</li>
               </ul>
             </div>
           </div>

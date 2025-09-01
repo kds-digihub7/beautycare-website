@@ -3,6 +3,7 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "@/components/CartContext"; // ✅ FIXED: import useCart
 
 // Sample product data with categories and more details
 const sampleProducts = [
@@ -14,7 +15,7 @@ const sampleProducts = [
     description: "Hydrating cream with natural ingredients for radiant skin",
     category: "Skincare",
     rating: 4.8,
-    featured: true
+    featured: true,
   },
   {
     id: 2,
@@ -24,7 +25,7 @@ const sampleProducts = [
     description: "Anti-aging serum with vitamin C and hyaluronic acid",
     category: "Skincare",
     rating: 4.7,
-    featured: true
+    featured: true,
   },
   {
     id: 3,
@@ -34,7 +35,7 @@ const sampleProducts = [
     description: "Daily cleanser for all skin types, removes impurities gently",
     category: "Skincare",
     rating: 4.5,
-    featured: false
+    featured: false,
   },
   {
     id: 4,
@@ -44,7 +45,7 @@ const sampleProducts = [
     description: "Weekly treatment mask for deep hydration and nourishment",
     category: "Skincare",
     rating: 4.6,
-    featured: false
+    featured: false,
   },
   {
     id: 5,
@@ -54,7 +55,7 @@ const sampleProducts = [
     description: "Premium lipstick set with 6 long-lasting shades",
     category: "Makeup",
     rating: 4.9,
-    featured: true
+    featured: true,
   },
   {
     id: 6,
@@ -64,7 +65,7 @@ const sampleProducts = [
     description: "Lengthening and volumizing mascara for dramatic lashes",
     category: "Makeup",
     rating: 4.4,
-    featured: false
+    featured: false,
   },
   {
     id: 7,
@@ -74,7 +75,7 @@ const sampleProducts = [
     description: "Luxurious body lotion with delicate floral fragrance",
     category: "Body Care",
     rating: 4.7,
-    featured: false
+    featured: false,
   },
   {
     id: 8,
@@ -84,12 +85,12 @@ const sampleProducts = [
     description: "Intensive repair serum for damaged and frizzy hair",
     category: "Hair Care",
     rating: 4.8,
-    featured: true
-  }
+    featured: true,
+  },
 ];
 
 // Extract unique categories
-const categories = [...new Set(sampleProducts.map(product => product.category))];
+const categories = [...new Set(sampleProducts.map((product) => product.category))];
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -99,38 +100,38 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOption, setSortOption] = useState("featured");
 
+  const { cartItems, removeFromCart, clearCart } = useCart(); // ✅ FIXED
+  const [cartOpen, setCartOpen] = useState(false);
+
+  // ✅ FIXED: subtotal calculation
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+
   // Simulate data fetching
   useEffect(() => {
-    const fetchProducts = async () => {
-      // Simulate API delay
-      setTimeout(() => {
-        setProducts(sampleProducts);
-        setFilteredProducts(sampleProducts);
-        setLoading(false);
-      }, 800);
-    };
-    fetchProducts();
+    setTimeout(() => {
+      setProducts(sampleProducts);
+      setFilteredProducts(sampleProducts);
+      setLoading(false);
+    }, 800);
   }, []);
 
   // Filter and sort products
   useEffect(() => {
     let result = [...products];
-    
-    // Filter by search query
+
     if (searchQuery) {
-      result = result.filter(product => 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      result = result.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
-    // Filter by category
+
     if (selectedCategory !== "All") {
-      result = result.filter(product => product.category === selectedCategory);
+      result = result.filter((product) => product.category === selectedCategory);
     }
-    
-    // Sort products
-    switch(sortOption) {
+
+    switch (sortOption) {
       case "price-low":
         result.sort((a, b) => a.price - b.price);
         break;
@@ -145,14 +146,13 @@ export default function Products() {
         break;
       case "featured":
       default:
-        // Featured first, then by name
         result.sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
           return a.name.localeCompare(b.name);
         });
     }
-    
+
     setFilteredProducts(result);
   }, [products, searchQuery, selectedCategory, sortOption]);
 
@@ -185,7 +185,7 @@ export default function Products() {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <motion.div 
+        <motion.div
           className="hero-content"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -196,8 +196,8 @@ export default function Products() {
         </motion.div>
       </section>
 
-      {/* Filters and Search Section */}
-      <section className="filters-section">
+      {/* Filters and Search */}
+     <section className="filters-section">
         <div className="container">
           <div className="filters-grid">
             {/* Search Input */}
@@ -261,41 +261,53 @@ export default function Products() {
       {/* Products Grid */}
       <section className="products-section">
         <div className="container">
+          <div className="products-grid">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* ✅ Cart Drawer */}
           <AnimatePresence>
-            {filteredProducts.length > 0 ? (
-              <motion.div 
-                className="products-grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+            {cartOpen && (
+              <motion.div
+                className="cart-drawer"
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
               >
-                {filteredProducts.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div 
-                className="no-products"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <i className="fas fa-search"></i>
-                <h3>No products found</h3>
-                <p>Try adjusting your search or filter criteria</p>
-                <button onClick={resetFilters}>Reset Filters</button>
+                <div className="cart-header">
+                  <h2>Your Cart</h2>
+                  <button onClick={() => setCartOpen(false)}>✖</button>
+                </div>
+                {cartItems.length === 0 ? (
+                  <p>Your cart is empty.</p>
+                ) : (
+                  <div>
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="cart-item">
+                        <img src={item.image} alt={item.name} />
+                        <div>
+                          <h4>{item.name}</h4>
+                          <p>
+                            ${item.price} × {item.qty}
+                          </p>
+                        </div>
+                        <button onClick={() => removeFromCart(item.id)}>Remove</button>
+                      </div>
+                    ))}
+                    <div className="cart-footer">
+                      <p>Subtotal: ${subtotal.toFixed(2)}</p>
+                      <button onClick={clearCart}>Clear Cart</button>
+                      <button className="checkout-btn">Checkout</button>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </section>
-
       <style jsx>{`
         .loading-container {
           min-height: 80vh;
@@ -437,8 +449,8 @@ export default function Products() {
         }
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 30px;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 20px; padding: 20px;
         }
         .no-products {
           text-align: center;
@@ -470,6 +482,20 @@ export default function Products() {
           background: #db2777;
         }
 
+        .cart-drawer {
+          position: fixed; top:0; right:0; bottom:0;
+          width: 320px; background: white; box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+          padding: 20px; overflow-y: auto; z-index: 1000;
+        }
+        .cart-header { display:flex; justify-content:space-between; align-items:center; }
+        .cart-item { display:flex; gap:10px; margin:10px 0; align-items:center; }
+        .cart-item img { width:50px; height:50px; object-fit:cover; border-radius:6px; }
+        .cart-footer { margin-top:20px; }
+        .checkout-btn {
+          background:#ec4899; color:white; padding:10px 16px;
+          border:none; border-radius:6px; margin-top:10px; width:100%;
+        }
+
         @media (max-width: 968px) {
           .filters-grid {
             grid-template-columns: 1fr 1fr;
@@ -490,6 +516,7 @@ export default function Products() {
             font-size: 2rem;
           }
         }
+
       `}</style>
     </>
   );
