@@ -1,303 +1,148 @@
+//src/pages/about.js
+
 import Head from "next/head";
-import Layout from "../components/Layout";
 import { motion } from "framer-motion";
 
-const About = () => {
+export default function About() {
   return (
-    <> {/* Add prop to conditionally hide footer in Layout */}
+    <>
       <Head>
-        <title>BeautyCare - About Us</title>
-        <meta name="description" content="Learn about BeautyCare" />
+        <title>KO Beauty - About Us</title>
+        <meta name="description" content="Learn about KO Beauty" />
       </Head>
 
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-background">
-          <motion.div
-            className="hero-content"
-            initial={{ opacity: 0, y: 50 }}
+      <section className="relative bg-gradient-to-r from-pink-800/80 to-pink-500/80 text-white">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')",
+          }}
+        />
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-28 md:py-40">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl md:text-6xl font-extrabold drop-shadow-lg"
           >
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.7 }}
-            >
-              About Us
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.7 }}
-            >
-              Your trusted partner in beauty & self-care ✨
-            </motion.p>
-          </motion.div>
+            About Us
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="mt-4 text-lg md:text-2xl font-light max-w-2xl"
+          >
+            Your trusted partner in beauty & self-care ✨
+          </motion.p>
         </div>
       </section>
 
-      {/* About Content */}
-      <section className="about-content">
+      {/* About Sections */}
+      <section className="max-w-7xl mx-auto px-6 py-20 space-y-24">
         {/* Who We Are */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true, margin: "-100px" }}
-          className="about-section"
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 gap-10 items-center"
         >
-          <div className="section-content">
-            <div className="text-content">
-              <h2>Who We Are</h2>
-              <p>
-                Welcome to <strong>SUBHAN SUNNY BEAUTYCARE</strong>, your number one
-                source for all beauty products. We're dedicated to providing you the
-                very best of beauty care, with an emphasis on{" "}
-                <span className="highlight">quality</span>,{" "}
-                <span className="highlight">customer service</span>, and{" "}
-                <span className="highlight">uniqueness</span>.
-              </p>
-            </div>
-            <div className="image-content">
-              <motion.div 
-                className="image-placeholder"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.7 }}
-                viewport={{ once: true }}
-              >
-                <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" alt="Luxury beauty products" />
-              </motion.div>
-            </div>
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-pink-800 relative pb-3 mb-6">
+              Who We Are
+              <span className="absolute bottom-0 left-0 w-16 h-1 bg-gradient-to-r from-pink-500 to-pink-800 rounded"></span>
+            </h2>
+            <p className="text-gray-600 leading-relaxed text-lg">
+              Welcome to{" "}
+              <span className="font-semibold text-pink-600">
+                KO Beauty
+              </span>
+              , your number one source for all beauty products. We're dedicated
+              to providing you the very best of beauty care, with an emphasis on{" "}
+              <span className="font-semibold text-pink-500">quality</span>,{" "}
+              <span className="font-semibold text-pink-500">
+                customer service
+              </span>
+              , and{" "}
+              <span className="font-semibold text-pink-500">uniqueness</span>.
+            </p>
           </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="rounded-xl overflow-hidden shadow-lg"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80"
+              alt="Luxury beauty products"
+              className="w-full h-80 object-cover hover:scale-105 transition-transform"
+            />
+          </motion.div>
         </motion.div>
 
         {/* Our Journey */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true, margin: "-100px" }}
-          className="about-section reversed"
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 gap-10 items-center md:flex-row-reverse"
         >
-          <div className="section-content">
-            <div className="text-content">
-              <h2>Our Journey</h2>
-              <p>
-                Founded in 2023, SUBHAN SUNNY BEAUTYCARE has come a long way from
-                its beginnings. Our passion for providing the best beauty products
-                drove us to start our own business — and today we are proud to be a
-                trusted beauty brand.
-              </p>
-            </div>
-            <div className="image-content">
-              <motion.div 
-                className="image-placeholder"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.7 }}
-                viewport={{ once: true }}
-              >
-                <img src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Beauty journey" />
-              </motion.div>
-            </div>
+          <div className="order-2 md:order-1">
+            <h2 className="text-3xl md:text-4xl font-bold text-pink-800 relative pb-3 mb-6">
+              Our Journey
+              <span className="absolute bottom-0 left-0 w-16 h-1 bg-gradient-to-r from-pink-500 to-pink-800 rounded"></span>
+            </h2>
+            <p className="text-gray-600 leading-relaxed text-lg">
+              Founded in 2023, KO BeautyKO Beauty has come a long way from its
+              beginnings. Our passion for providing the best beauty products
+              drove us to start our own business — and today we are proud to be
+              a trusted beauty brand.
+            </p>
           </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="rounded-xl overflow-hidden shadow-lg order-1 md:order-2"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+              alt="Beauty journey"
+              className="w-full h-80 object-cover hover:scale-105 transition-transform"
+            />
+          </motion.div>
         </motion.div>
 
         {/* Our Promise */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true, margin: "-100px" }}
-          className="about-section promise-section"
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-r from-pink-50 to-pink-100 rounded-3xl p-10 md:p-16 text-center shadow-xl"
         >
-          <div className="promise-content">
-            <h2>Our Promise</h2>
-            <p>
-              We hope you enjoy our products as much as we enjoy offering them to
-              you. If you have any questions or comments, please don't hesitate to
-              contact us.
-            </p>
-            <div className="signature">
-              <strong>Sincerely,</strong>
-              <br />
-              The SUBHAN SUNNY BEAUTYCARE Team 🌸
-            </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-pink-800 mb-6">
+            Our Promise
+          </h2>
+          <p className="text-gray-600 leading-relaxed text-lg max-w-3xl mx-auto mb-8">
+            We hope you enjoy our products as much as we enjoy offering them to
+            you. If you have any questions or comments, please don't hesitate to
+            contact us.
+          </p>
+          <div className="italic text-xl text-pink-700">
+            <strong>Sincerely,</strong>
+            <br />
+            The KO BeautyKO Beauty Team 🌸
           </div>
         </motion.div>
       </section>
-
-      <style jsx>{`
-        .hero-section {
-          position: relative;
-          overflow: hidden;
-        }
-        .hero-background {
-          background: linear-gradient(135deg, rgba(124, 45, 105, 0.85) 0%, rgba(189, 77, 117, 0.85) 100%), 
-                     url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
-          background-size: cover;
-          background-position: center;
-          padding: 120px 20px;
-          text-align: center;
-          color: white;
-          position: relative;
-        }
-        .hero-content h1 {
-          font-size: 3.5rem;
-          font-weight: 700;
-          margin-bottom: 1.5rem;
-          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        .hero-content p {
-          font-size: 1.5rem;
-          max-width: 600px;
-          margin: 0 auto;
-          font-weight: 300;
-        }
-        .about-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 80px 20px;
-        }
-        .about-section {
-          margin-bottom: 100px;
-          position: relative;
-        }
-        .section-content {
-          display: flex;
-          align-items: center;
-          gap: 60px;
-        }
-        .reversed .section-content {
-          flex-direction: row-reverse;
-        }
-        .text-content {
-          flex: 1;
-        }
-        .text-content h2 {
-          font-size: 2.5rem;
-          color: #7c2d69;
-          margin-bottom: 1.5rem;
-          position: relative;
-          padding-bottom: 15px;
-        }
-        .text-content h2:after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 60px;
-          height: 3px;
-          background: linear-gradient(to right, #ec4899, #7c2d69);
-        }
-        .text-content p {
-          font-size: 1.2rem;
-          line-height: 1.8;
-          color: #555;
-        }
-        .image-content {
-          flex: 1;
-          position: relative;
-        }
-        .image-placeholder {
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-        }
-        .image-placeholder:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-        }
-        .image-placeholder img {
-          width: 100%;
-          height: 400px;
-          object-fit: cover;
-          display: block;
-        }
-        .highlight {
-          color: #ec4899;
-          font-weight: 600;
-          position: relative;
-          display: inline-block;
-        }
-        .highlight:after {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          width: 100%;
-          height: 6px;
-          background: rgba(236, 72, 153, 0.2);
-          z-index: -1;
-        }
-        .promise-section {
-          background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
-          border-radius: 20px;
-          padding: 60px;
-          margin-top: 40px;
-          text-align: center;
-        }
-        .promise-content h2 {
-          font-size: 2.5rem;
-          color: #7c2d69;
-          margin-bottom: 2rem;
-        }
-        .promise-content p {
-          font-size: 1.2rem;
-          line-height: 1.8;
-          color: #555;
-          max-width: 800px;
-          margin: 0 auto 2rem;
-        }
-        .signature {
-          font-style: italic;
-          font-size: 1.3rem;
-          color: #7c2d69;
-        }
-        @media (max-width: 968px) {
-          .section-content {
-            flex-direction: column;
-            gap: 40px;
-          }
-          .reversed .section-content {
-            flex-direction: column;
-          }
-          .hero-content h1 {
-            font-size: 2.5rem;
-          }
-          .hero-content p {
-            font-size: 1.2rem;
-          }
-          .about-content {
-            padding: 60px 20px;
-          }
-          .text-content h2 {
-            font-size: 2rem;
-          }
-          .promise-section {
-            padding: 40px 20px;
-          }
-        }
-        @media (max-width: 768px) {
-          .hero-background {
-            padding: 80px 20px;
-          }
-          .hero-content h1 {
-            font-size: 2rem;
-          }
-          .text-content h2 {
-            font-size: 1.8rem;
-          }
-          .text-content p {
-            font-size: 1.1rem;
-          }
-        }
-      `}</style>
     </>
   );
-};
-
-export default About;
+}

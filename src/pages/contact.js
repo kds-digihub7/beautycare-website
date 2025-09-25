@@ -35,8 +35,11 @@ export default function Contact() {
   return (
     <>
       <Head>
-        <title>BeautyCare - Contact Us</title>
-        <meta name="description" content="Get in touch with BeautyCare for premium beauty products and customer support" />
+        <title>KO Beauty - Contact Us</title>
+        <meta
+          name="description"
+          content="Get in touch with KO Beauty for premium beauty products and customer support"
+        />
       </Head>
 
       {/* Hero Section */}
@@ -50,7 +53,10 @@ export default function Contact() {
               className="hero-content"
             >
               <h1>Get in Touch</h1>
-              <p>We'd love to hear from you 💌 Reach out for any questions or feedback!</p>
+              <p>
+                We'd love to hear from you 💌 Reach out for any questions or
+                feedback!
+              </p>
             </motion.div>
           </div>
         </div>
@@ -70,7 +76,9 @@ export default function Contact() {
             >
               <div className="form-header">
                 <h2>Send us a Message</h2>
-                <p>Fill out the form below and we'll respond as soon as possible</p>
+                <p>
+                  Fill out the form below and we'll respond as soon as possible
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="contact-form">
@@ -177,7 +185,7 @@ export default function Contact() {
                   </div>
                   <div className="info-content">
                     <h3>Email</h3>
-                    <p>info@beautycare.com</p>
+                    <p>info@KO Beauty.com</p>
                     <span>We respond within 24 hours</span>
                   </div>
                 </div>
@@ -208,7 +216,13 @@ export default function Contact() {
               <div className="social-section">
                 <h3>Follow Us</h3>
                 <div className="social-icons">
-                  {["facebook-f", "instagram", "twitter", "pinterest-p", "youtube"].map((icon) => (
+                  {[
+                    "facebook-f",
+                    "instagram",
+                    "twitter",
+                    "pinterest-p",
+                    "youtube",
+                  ].map((icon) => (
                     <a
                       key={icon}
                       href="#"
@@ -229,7 +243,7 @@ export default function Contact() {
         .hero-section {
           position: relative;
           height: 400px;
-          background: url('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+          background: url("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80");
           background-size: cover;
           background-position: center;
           display: flex;
@@ -242,7 +256,10 @@ export default function Contact() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(rgba(124, 45, 105, 0.8), rgba(190, 24, 93, 0.7));
+          background: linear-gradient(
+            rgba(124, 45, 105, 0.8),
+            rgba(190, 24, 93, 0.7)
+          );
         }
         .hero-content {
           position: relative;
@@ -365,8 +382,12 @@ export default function Contact() {
           animation: spin 1s linear infinite;
         }
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         .contact-info {

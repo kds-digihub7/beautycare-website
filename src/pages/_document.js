@@ -13,7 +13,7 @@ export default function Document() {
         <meta name="theme-color" content="#FF7AB6" />
         <meta
           name="description"
-          content="BeautyCare - Modern beauty and self-care products website"
+          content="KO Beauty - Modern beauty and self-care products website"
         />
       </Head>
       <body className="antialiased bg-pink-light text-gray-800">
