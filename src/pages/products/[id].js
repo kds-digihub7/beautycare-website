@@ -63,12 +63,13 @@ export default function ProductDetail() {
 
   // Fetch reviews
   useEffect(() => {
-    if (id) {
-      fetch(`/api/reviews/${id}`)
-        .then((res) => res.json())
-        .then((data) => setReviews(data));
-    }
-  }, [id]);
+  if (id) {
+    fetch(`/api/reviews/${id}`)
+      .then((res) => res.json())
+      .then((data) => setReviews(Array.isArray(data) ? data : [])) // yahan fix
+      .catch(() => setReviews([]));
+  }
+}, [id]);
 
   const { data: products = [], isLoading } = useSWR("/api/products", fetcher);
 
