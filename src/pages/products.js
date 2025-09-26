@@ -3,38 +3,12 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCart } from "@/components/CartContext"; // ✅ FIXED
+import { useCart } from "@/components/CartContext";
+import useSWR from "swr";
 
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Luxury Face Cream",
-    price: 49.99,
-    image:
-      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=600&q=80",
-    description: "Hydrating cream with natural ingredients for radiant skin",
-    category: "Skincare",
-    rating: 4.8,
-    featured: true,
-  },
-  {
-    id: 2,
-    name: "Revitalizing Serum",
-    price: 59.99,
-    image:
-      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80",
-    description: "Anti-aging serum with vitamin C and hyaluronic acid",
-    category: "Skincare",
-    rating: 4.7,
-    featured: true,
-  },
-  // ... baki products
-];
-
-const categories = [...new Set(sampleProducts.map((p) => p.category))];
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function Products() {
-  const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,16 +20,43 @@ export default function Products() {
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setProducts(sampleProducts);
-      setFilteredProducts(sampleProducts);
-      setLoading(false);
-    }, 800);
-  }, []);
+  // 🔹 Fetch products with SWR (auto refresh every 5s)
+  const { data: products = [], error, isLoading } = useSWR(
+    "/api/products",
+    fetcher,
+    { refreshInterval: 5000 } // real-time-ish updates
+  );
 
+  // 🔹 Categories generated from actual products
+  const categories = ["All", ...new Set(products.map((p) => p.category || "Other"))];
+
+  // 🔹 Filtering + sorting
   useEffect(() => {
-    let result = [...products];
+    if (!products.length) return;
+
+    let result = [...products].map((p) => {
+      let images = [];
+      if (Array.isArray(p.images)) {
+        images = p.images;
+      } else {
+        try {
+          images = JSON.parse(p.images);
+        } catch {
+          images = [];
+        }
+      }
+      return {
+  id: p.id,
+  name: p.name,
+  description: p.description,
+  price: p.price,
+  image: images[0] || "/placeholder.png",
+  category: p.category || "Uncategorized",
+  rating: p.rating || 4.5,
+  featured: p.featured || false,
+  isNew: p.created_at && new Date(p.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000),
+};
+    });
 
     if (searchQuery) {
       result = result.filter(
@@ -90,7 +91,9 @@ export default function Products() {
           return a.name.localeCompare(b.name);
         });
     }
+
     setFilteredProducts(result);
+    setLoading(false);
   }, [products, searchQuery, selectedCategory, sortOption]);
 
   const resetFilters = () => {
@@ -99,12 +102,24 @@ export default function Products() {
     setSortOption("featured");
   };
 
-  if (loading) {
+  // 🔹 Loading state
+  if (loading || isLoading) {
     return (
       <Layout>
         <div className="flex min-h-[80vh] flex-col items-center justify-center bg-gradient-to-br from-pink-100 to-pink-50">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-pink-300 border-t-pink-500 mb-4"></div>
           <p className="text-pink-800 text-lg">Loading our luxurious products...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // 🔹 Error state
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex min-h-[80vh] items-center justify-center text-red-600">
+          Failed to load products ❌
         </div>
       </Layout>
     );
@@ -121,10 +136,12 @@ export default function Products() {
       </Head>
 
       {/* Hero Section */}
-      <section className="relative bg-cover bg-center text-white py-24 px-6 text-center"
+      <section
+        className="relative bg-cover bg-center text-white py-24 px-6 text-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(124,45,105,0.9),rgba(190,24,93,0.85)), url(https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1600&q=80)`
-        }}>
+          backgroundImage: `linear-gradient(rgba(124,45,105,0.9),rgba(190,24,93,0.85)), url(https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1600&q=80)`,
+        }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -166,7 +183,6 @@ export default function Products() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition"
               >
-                <option value="All">All Categories</option>
                 {categories.map((c) => (
                   <option key={c} value={c}>
                     {c}

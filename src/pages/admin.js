@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = React.useState("products");
@@ -14,8 +15,9 @@ export default function AdminPage() {
     stock_left: 0,
     company_name: "",
   });
-  const [imageFiles, setImageFiles] = React.useState([]); // multiple images
-  const [videoFile, setVideoFile] = React.useState(null); // single video
+  const [imageFiles, setImageFiles] = React.useState([]);
+  const [videoFile, setVideoFile] = React.useState(null);
+  const [uploadProgress, setUploadProgress] = React.useState({}); // per file progress
   const [admin, setAdmin] = React.useState(null);
   const [creds, setCreds] = React.useState({ email: "", password: "" });
 
@@ -27,9 +29,7 @@ export default function AdminPage() {
 
   async function checkAdmin() {
     try {
-      const r = await fetch("/api/admin/me", {
-        credentials: "include",
-      });
+      const r = await fetch("/api/admin/me", { credentials: "include" });
       if (r.ok) {
         const data = await r.json();
         setAdmin(data);
@@ -68,9 +68,7 @@ export default function AdminPage() {
     try {
       const r = await fetch("/api/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(creds),
         credentials: "include",
       });
@@ -89,24 +87,26 @@ export default function AdminPage() {
     }
   }
 
-  async function uploadFiles(files) {
-  const fd = new FormData();
-  for (const f of files) {
-    fd.append("file", f); // multiple files
-  }
-  const r = await fetch("/api/upload", {
-    method: "POST",
-    body: fd,
-  });
+  // ---- Upload with per-file progress ----
+  async function uploadSingleFile(file, index, type = "image") {
+    const fd = new FormData();
+    fd.append("file", file);
 
-  if (!r.ok) {
-    const error = await r.json();
-    throw new Error(error.error || "Upload failed");
-  }
+    const res = await axios.post("/api/upload", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: (e) => {
+        if (e.total) {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          setUploadProgress((prev) => ({
+            ...prev,
+            [`${type}-${index}`]: percent,
+          }));
+        }
+      },
+    });
 
-  const j = await r.json();
-  return j.urls; // now matches backend
-}
+    return res.data.urls[0];
+  }
 
   async function handleAddProduct() {
     try {
@@ -118,13 +118,15 @@ export default function AdminPage() {
       let imageUrls = [];
       let videoUrl = "";
 
-      if (imageFiles.length > 0) {
-        imageUrls = await uploadFiles(imageFiles);
+      // upload each image separately with progress
+      for (let i = 0; i < imageFiles.length; i++) {
+        const url = await uploadSingleFile(imageFiles[i], i, "image");
+        imageUrls.push(url);
       }
 
+      // upload video separately
       if (videoFile) {
-        const urls = await uploadFiles([videoFile]);
-        videoUrl = urls[0];
+        videoUrl = await uploadSingleFile(videoFile, 0, "video");
       }
 
       const payload = {
@@ -137,9 +139,7 @@ export default function AdminPage() {
 
       const r = await fetch("/api/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
@@ -163,6 +163,7 @@ export default function AdminPage() {
       });
       setImageFiles([]);
       setVideoFile(null);
+      setUploadProgress({});
 
       alert("Product added successfully");
     } catch (e) {
@@ -171,33 +172,10 @@ export default function AdminPage() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!confirm("Are you sure you want to delete this product?")) return;
-
-    try {
-      const r = await fetch(`/api/products?id=${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (r.ok) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-        alert("Product deleted successfully");
-      } else {
-        const error = await r.json();
-        throw new Error(error.error || "Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      alert("Error deleting product: " + error.message);
-    }
-  }
-
   function handleLogout() {
     setAdmin(null);
     setCreds({ email: "", password: "" });
-    document.cookie =
-      "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   }
 
   function parseImages(product) {
@@ -258,17 +236,13 @@ export default function AdminPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <div className="w-64 bg-gray-900 text-white p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Admin ⚙️</h1>
-          <p className="text-sm text-gray-300 mt-1">Welcome, {admin.email}</p>
-        </div>
+        <h1 className="text-2xl font-bold">Admin ⚙️</h1>
+        <p className="text-sm text-gray-300 mt-1">Welcome, {admin.email}</p>
 
         <nav className="space-y-2">
           <button
             className={`block w-full text-left px-4 py-2 rounded transition ${
-              activeTab === "products"
-                ? "bg-pink-600"
-                : "hover:bg-gray-700"
+              activeTab === "products" ? "bg-pink-600" : "hover:bg-gray-700"
             }`}
             onClick={() => setActiveTab("products")}
           >
@@ -276,23 +250,11 @@ export default function AdminPage() {
           </button>
           <button
             className={`block w-full text-left px-4 py-2 rounded transition ${
-              activeTab === "orders"
-                ? "bg-pink-600"
-                : "hover:bg-gray-700"
+              activeTab === "orders" ? "bg-pink-600" : "hover:bg-gray-700"
             }`}
             onClick={() => setActiveTab("orders")}
           >
             🛒 Orders
-          </button>
-          <button
-            className={`block w-full text-left px-4 py-2 rounded transition ${
-              activeTab === "settings"
-                ? "bg-pink-600"
-                : "hover:bg-gray-700"
-            }`}
-            onClick={() => setActiveTab("settings")}
-          >
-            ⚙️ Settings
           </button>
         </nav>
 
@@ -366,59 +328,78 @@ export default function AdminPage() {
                   className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-pink-500 md:col-span-2"
                   rows="3"
                 />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Upload up to 3 Images
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) =>
-                      setImageFiles(Array.from(e.target.files).slice(0, 3))
-                    }
-                    className="border border-gray-300 p-2 rounded w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Upload Video
-                  </label>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => setVideoFile(e.target.files[0])}
-                    className="border border-gray-300 p-2 rounded w-full"
-                  />
-                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) =>
+                    setImageFiles(Array.from(e.target.files).slice(0, 3))
+                  }
+                  className="border border-gray-300 p-2 rounded w-full"
+                />
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setVideoFile(e.target.files[0])}
+                  className="border border-gray-300 p-2 rounded w-full"
+                />
               </div>
+
+              {/* Per-file progress bars */}
+              {imageFiles.map((f, i) => (
+                <div key={i} className="mt-2">
+                  <p className="text-sm">{f.name}</p>
+                  <div className="w-full bg-gray-200 rounded h-2">
+                    <div
+                      className="bg-green-500 h-2 rounded"
+                      style={{
+                        width: `${uploadProgress[`image-${i}`] || 0}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+              {videoFile && (
+                <div className="mt-2">
+                  <p className="text-sm">{videoFile.name}</p>
+                  <div className="w-full bg-gray-200 rounded h-2">
+                    <div
+                      className="bg-blue-500 h-2 rounded"
+                      style={{
+                        width: `${uploadProgress["video-0"] || 0}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={handleAddProduct}
-                className="bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 transition"
+                className="mt-4 bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 transition"
               >
                 Upload & Add Product
               </button>
             </div>
 
+            {/* Products list */}
             <div className="bg-white p-6 rounded-xl shadow">
               <h2 className="text-xl font-semibold mb-4">
                 Products ({products.length})
               </h2>
               <div className="space-y-4">
                 {products.map((p) => {
-                  const productImages = parseImages(p);
+                  const imgs = parseImages(p);
                   return (
                     <motion.div
                       key={p.id}
-                      className="flex justify-between items-center border-b border-gray-200 py-4"
+                      className="flex justify-between items-center border-b py-4"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
                       <div className="flex items-center gap-4">
-                        {productImages[0] ? (
+                        {imgs[0] ? (
                           <img
-                            src={productImages[0]}
+                            src={imgs[0]}
                             alt={p.name}
                             className="w-14 h-14 object-cover rounded"
                           />
@@ -430,87 +411,13 @@ export default function AdminPage() {
                         <div>
                           <p className="font-semibold">{p.name}</p>
                           <p className="text-sm text-gray-600">${p.price}</p>
-                          <p className="text-xs text-gray-500">
-                            Stock: {p.stock_left || 0}
-                          </p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="text-red-500 hover:text-red-700 transition"
-                      >
-                        Delete
-                      </button>
                     </motion.div>
                   );
                 })}
               </div>
             </div>
-          </div>
-        )}
-
-        {activeTab === "orders" && (
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold mb-4">
-              Orders ({orders.length})
-            </h2>
-            <div className="space-y-4">
-              {orders.map((o) => (
-                <div
-                  key={o.id}
-                  className="border border-gray-200 rounded-lg p-4"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-bold">Order #{o.id}</p>
-                      <p className="text-sm text-gray-600">
-                        Customer: {o.customer_name || o.email}
-                      </p>
-                      <p className="text-sm">Total: ${o.total}</p>
-                      <p className="text-sm">
-                        Status:{" "}
-                        <span
-                          className={`font-medium ${
-                            o.tracking_status === "delivered"
-                              ? "text-green-600"
-                              : o.tracking_status === "cancelled"
-                              ? "text-red-600"
-                              : "text-yellow-600"
-                          }`}
-                        >
-                          {o.tracking_status || "pending"}
-                        </span>
-                      </p>
-                    </div>
-                    <select
-                      value={o.tracking_status || "processing"}
-                      onChange={(e) =>
-                        updateOrderStatus(o.id, e.target.value)
-                      }
-                      className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
-                    >
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="out_for_delivery">
-                        Out for delivery
-                      </option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "settings" && (
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold mb-4">Settings</h2>
-            <p className="text-gray-600">
-              Configure payment gateways, coupons, and other settings (future
-              implementation).
-            </p>
           </div>
         )}
       </div>

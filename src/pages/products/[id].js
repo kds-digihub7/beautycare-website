@@ -1,166 +1,330 @@
-// pages/products/[id].js
+// src/pages/products/[id].js
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import useSWR from "swr";
+import Image from "next/image";
 import { useCart } from "@/components/CartContext";
+import { useState, useEffect, useRef } from "react";
+
+// Swiper
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function ProductDetail() {
   const router = useRouter();
   const { id } = router.query;
   const { addToCart } = useCart();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [newReview, setNewReview] = useState({
+    email: "",
+    name: "",
+    hideName: false,
+    rating: 5,
+    comment: "",
+  });
 
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  const addToCartBtnRef = useRef(null);
+
+  // Observe Add to Cart button
   useEffect(() => {
-    if (!id) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowStickyBar(!entry.isIntersecting);
+      },
+      { threshold: 1 }
+    );
 
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/products?id=${id}`);
-        
-        if (!response.ok) throw new Error('Product not found');
-        
-        const productData = await response.json();
-        setProduct(productData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    if (addToCartBtnRef.current) {
+      observer.observe(addToCartBtnRef.current);
+    }
+    return () => {
+      if (addToCartBtnRef.current) {
+        observer.unobserve(addToCartBtnRef.current);
       }
     };
+  }, []);
 
-    fetchProduct();
+  // Sticky Header show on scroll
+  useEffect(() => {
+    const onScroll = () => {
+      setShowStickyHeader(window.scrollY > 100);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Fetch reviews
+  useEffect(() => {
+    if (id) {
+      fetch(`/api/reviews/${id}`)
+        .then((res) => res.json())
+        .then((data) => setReviews(data));
+    }
   }, [id]);
 
-  if (loading) return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
-    </div>
-  );
+  const { data: products = [], isLoading } = useSWR("/api/products", fetcher);
 
-  if (error) return (
-    <div className="container mx-auto px-4 py-10 text-center">
-      <p className="text-red-500 text-xl">Error: {error}</p>
-      <button 
-        onClick={() => router.back()}
-        className="mt-4 bg-pink-600 text-white px-6 py-2 rounded"
-      >
-        Go Back
-      </button>
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        Loading product...
+      </div>
+    );
+  }
 
-  if (!product) return <p className="p-8">Product not found</p>;
+  const product = products.find((p) => p.id == id);
+  if (!product) {
+    return <div className="p-6">Product not found ❌</div>;
+  }
 
-  // Parse JSON fields if they're stored as strings
-  const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-  const reviews = typeof product.reviews === 'string' ? JSON.parse(product.reviews) : product.reviews;
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    const res = await fetch("/api/reviews/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        product_id: id,
+        customer_email: newReview.email,
+        customer_name: newReview.name,
+        hide_name: newReview.hideName,
+        rating: newReview.rating,
+        comment: newReview.comment,
+      }),
+    });
+
+    if (res.ok) {
+      const added = await res.json();
+      setReviews([added, ...reviews]);
+      setNewReview({
+        email: "",
+        name: "",
+        hideName: false,
+        rating: 5,
+        comment: "",
+      });
+    }
+  };
+
+  // Parse images
+  let images = [];
+  try {
+    images = Array.isArray(product.images)
+      ? product.images
+      : JSON.parse(product.images);
+  } catch {
+    images = [];
+  }
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Media section */}
-        <div className="space-y-4">
-          <motion.img
-            src={images[0]}
-            alt={product.name}
-            className="rounded-2xl shadow-lg w-full h-96 object-cover"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-          />
-          
-          {images.length > 1 && (
-            <div className="grid grid-cols-3 gap-4">
-              {images.slice(1).map((img, i) => (
-                <motion.img
-                  key={i}
-                  src={img}
-                  alt={product.name}
-                  className="rounded-xl shadow-md w-full h-32 object-cover"
-                  whileHover={{ scale: 1.05 }}
-                />
-              ))}
-            </div>
-          )}
-          
-          {product.video && (
-            <motion.video
-              controls
-              className="rounded-xl shadow-md w-full"
-              whileHover={{ scale: 1.02 }}
-            >
-              <source src={product.video} type="video/mp4" />
-            </motion.video>
-          )}
+    <>
+      {/* Sticky Header (Mobile Only) */}
+      {showStickyHeader && (
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md px-4 py-3 text-center font-semibold text-pink-600 md:hidden z-50">
+          {product.name}
         </div>
+      )}
 
-        {/* Product details */}
-        <div>
-          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-          <p className="text-gray-600 mb-4">{product.description}</p>
-          
-          {/* Price display */}
-          <div className="mb-6">
-            {product.discounted_price ? (
-              <div className="flex items-center gap-4">
-                <span className="text-2xl font-semibold text-pink-600">
-                  ${product.discounted_price}
-                </span>
-                <span className="text-lg text-gray-500 line-through">
-                  ${product.price}
-                </span>
-                <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">
-                  Save ${(product.price - product.discounted_price).toFixed(2)}
-                </span>
-              </div>
-            ) : (
-              <p className="text-2xl font-semibold text-pink-600">
-                ${product.price}
-              </p>
-            )}
+      <div className="max-w-6xl mx-auto py-6 px-3 sm:px-4 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+          {/* Left: Swiper Gallery */}
+          <div className="w-full">
+            <Swiper
+              modules={[Navigation, Pagination]}
+              pagination={{ clickable: true }}
+              navigation
+              spaceBetween={15}
+              className="rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg"
+            >
+              {/* Video as first slide */}
+              {product.video && (
+                <SwiperSlide>
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-[280px] sm:h-[400px] object-contain bg-black rounded-xl sm:rounded-2xl"
+                  >
+                    <source src={product.video} type="video/mp4" />
+                  </video>
+                </SwiperSlide>
+              )}
+
+              {/* Images */}
+              {images.map((img, i) => (
+                <SwiperSlide key={i}>
+                  <div className="relative w-full h-[280px] sm:h-[400px] bg-black rounded-xl sm:rounded-2xl">
+                    <Image
+                      src={img}
+                      alt={`${product.name} image ${i + 1}`}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
 
-          {/* Stock information */}
-          <p className={`mb-4 ${product.stock_left > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {product.stock_left > 0 ? `${product.stock_left} in stock` : 'Out of stock'}
-          </p>
+          {/* Right: Product Info */}
+          <div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-pink-600">
+              {product.name}
+            </h1>
+            <p className="mt-3 text-gray-700 text-sm sm:text-base leading-relaxed">
+              {product.description}
+            </p>
+            <p className="mt-4 text-xl sm:text-2xl font-semibold text-pink-500">
+              ${product.price}
+            </p>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => addToCart(product)}
-            disabled={product.stock_left === 0}
-            className={`px-6 py-3 rounded-xl shadow transition ${
-              product.stock_left > 0 
-                ? 'bg-pink-600 text-white hover:bg-pink-700' 
-                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
-            }`}
-          >
-            {product.stock_left > 0 ? 'Add to Cart 🛒' : 'Out of Stock'}
-          </motion.button>
-
-          {/* Reviews */}
-          {reviews && reviews.length > 0 && (
-            <div className="mt-10">
-              <h2 className="text-xl font-semibold mb-4">Customer Reviews</h2>
-              {reviews.map((r) => (
-                <motion.div
-                  key={r.id}
-                  className="bg-gray-100 p-4 rounded-lg mb-3"
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                >
-                  <p className="font-bold">{r.user}</p>
-                  <p>{"⭐".repeat(r.rating)}</p>
-                  <p>{r.text}</p>
-                </motion.div>
-              ))}
+            {/* Buttons */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                ref={addToCartBtnRef}
+                onClick={() => addToCart(product)}
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white font-semibold rounded-lg sm:rounded-xl shadow hover:opacity-90 transition"
+              >
+                🛒 Add to Cart
+              </button>
+              <button
+                onClick={() => {
+                  addToCart(product);
+                  router.push("/checkout");
+                }}
+                className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white font-semibold rounded-lg sm:rounded-xl shadow hover:bg-green-700 transition"
+              >
+                ⚡ Buy Now
+              </button>
             </div>
-          )}
+
+            {/* Reviews */}
+            <div className="mt-8 sm:mt-10">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3">
+                Customer Reviews
+              </h2>
+              {reviews.length === 0 && (
+                <p className="text-gray-500 text-sm sm:text-base">
+                  No reviews yet.
+                </p>
+              )}
+              {reviews.map((r) => (
+                <div
+                  key={r.id}
+                  className="border-b py-3 flex flex-col space-y-1 text-sm sm:text-base"
+                >
+                  <p className="font-semibold">
+                    {r.hide_name
+                      ? "Anonymous"
+                      : r.customer_name || r.customer_email}
+                  </p>
+                  <p className="text-gray-600">{r.comment}</p>
+                  <p className="text-yellow-500">⭐ {r.rating}/5</p>
+                </div>
+              ))}
+
+              {/* Review Form */}
+              <form
+                onSubmit={handleReviewSubmit}
+                className="mt-5 space-y-3 bg-gray-50 p-4 rounded-lg"
+              >
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  className="w-full border px-3 py-2 rounded text-sm sm:text-base"
+                  value={newReview.email}
+                  onChange={(e) =>
+                    setNewReview({ ...newReview, email: e.target.value })
+                  }
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Your name (optional)"
+                  className="w-full border px-3 py-2 rounded text-sm sm:text-base"
+                  value={newReview.name}
+                  onChange={(e) =>
+                    setNewReview({ ...newReview, name: e.target.value })
+                  }
+                />
+                <label className="flex items-center space-x-2 text-sm sm:text-base">
+                  <input
+                    type="checkbox"
+                    checked={newReview.hideName}
+                    onChange={(e) =>
+                      setNewReview({
+                        ...newReview,
+                        hideName: e.target.checked,
+                      })
+                    }
+                  />
+                  <span>Don’t show my name</span>
+                </label>
+                <select
+                  className="w-full border px-3 py-2 rounded text-sm sm:text-base"
+                  value={newReview.rating}
+                  onChange={(e) =>
+                    setNewReview({
+                      ...newReview,
+                      rating: Number(e.target.value),
+                    })
+                  }
+                >
+                  {[5, 4, 3, 2, 1].map((n) => (
+                    <option key={n} value={n}>
+                      {n} Stars
+                    </option>
+                  ))}
+                </select>
+                <textarea
+                  placeholder="Write your review..."
+                  className="w-full border px-3 py-2 rounded text-sm sm:text-base"
+                  value={newReview.comment}
+                  onChange={(e) =>
+                    setNewReview({ ...newReview, comment: e.target.value })
+                  }
+                  required
+                />
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition text-sm sm:text-base"
+                >
+                  Submit Review
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Sticky Mobile Bottom Bar */}
+      {showStickyBar && (
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t shadow-md p-4 flex gap-2 md:hidden z-50">
+          <button
+            onClick={() => addToCart(product)}
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-red-500 text-white font-semibold rounded-lg shadow hover:opacity-90 transition text-sm"
+          >
+            🛒 Add to Cart
+          </button>
+          <button
+            onClick={() => {
+              addToCart(product);
+              router.push("/checkout");
+            }}
+            className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition text-sm"
+          >
+            ⚡ Buy Now
+          </button>
+        </div>
+      )}
+    </>
   );
 }
